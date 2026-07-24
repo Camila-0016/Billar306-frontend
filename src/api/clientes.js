@@ -21,3 +21,9 @@ export async function obtenerCliente(id) {
   if (!res.ok) return null;
   return res.json();
 }
+
+export async function listarClientes() {
+  const res = await fetch(`${API_URL}/api/clientes`);
+  if (!res.ok) throw new Error("Error al listar clientes");
+  return res.json();
+}

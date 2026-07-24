@@ -1,0 +1,40 @@
+.cliente-item {
+  background: white;
+  border-radius: var(--radio);
+  padding: 12px 14px;
+  margin-top: 8px;
+  font-size: 14px;
+  box-shadow: var(--sombra);
+}
+
+.hint-texto {
+  color: #888;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.fab-agregar {
+  position: absolute;   
+  bottom: 84px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-dorado);
+  color: var(--color-madera-oscura);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+.exito-msg {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 10px 14px;
+  border-radius: var(--radio);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
