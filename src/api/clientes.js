@@ -12,7 +12,7 @@ export async function crearCliente(nombreCompleto) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nombreCompleto }),
   });
-  if (!res.ok) throw new Error("Error al crear cliente");
+  if (!res.ok) throw new Error((await res.json()).mensaje ?? "Error al crear cliente");
   return res.json();
 }
 

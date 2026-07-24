@@ -20,3 +20,13 @@ export async function quitarItem(itemId) {
   const res = await fetch(`${API_URL}/api/confiteria/items/${itemId}`, { method: "DELETE" });
   if (!res.ok) throw new Error((await res.json()).mensaje ?? "Error al retirar ítem");
 }
+
+export async function crearVentaDirecta({ clienteId, nombreClienteNuevo, empleadoId, items }) {
+  const res = await fetch(`${API_URL}/api/confiteria/venta-directa`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ clienteId, nombreClienteNuevo, empleadoId, items }),
+  });
+  if (!res.ok) throw new Error((await res.json()).mensaje ?? "Error al registrar la venta");
+  return res.json();
+}
