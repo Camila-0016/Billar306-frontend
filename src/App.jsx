@@ -6,6 +6,8 @@ import Mesas from "./pages/Mesas/Mesas";
 import Venta from "./pages/Venta/Venta";
 import Clientes from "./pages/Clientes/Clientes";
 import Mas from "./pages/Mas/Mas";
+import MesaDetalle from "./pages/Mesas/MesaDetalle";
+
 
 export default function App() {
   return (
@@ -19,6 +21,7 @@ export default function App() {
         <Route path="/venta" element={<Venta />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/mas" element={<Mas />} />
+        <Route path="/mesas/:id" element={<MesaDetalle />} />
       </Route>
     </Routes>
   );
