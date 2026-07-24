@@ -1,0 +1,27 @@
+.login-screen {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-fieltro-oscuro);
+  gap: 4px;
+}
+
+.login-logo {
+  text-align: center;
+  color: var(--color-dorado-claro);
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 28px;
+}
+
+.login-screen label {
+  color: var(--color-marfil);
+}
+
+.login-screen input {
+  margin-bottom: 16px;
+}

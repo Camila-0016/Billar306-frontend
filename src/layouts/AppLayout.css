@@ -1,0 +1,17 @@
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background: var(--color-marfil);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: var(--sombra);
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 84px;
+}

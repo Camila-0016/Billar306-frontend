@@ -1,0 +1,85 @@
+:root {
+  --color-fieltro: #0d5c3d;
+  --color-fieltro-oscuro: #073d29;
+  --color-madera: #4e342e;
+  --color-madera-oscura: #2e1a13;
+  --color-dorado: #c9a227;
+  --color-dorado-claro: #e0c25c;
+  --color-marfil: #f8f4ea;
+  --color-texto: #2b1d12;
+  --color-error: #b3261e;
+  --color-borde: #d8cdb0;
+
+  --radio: 10px;
+  --sombra: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-fieltro-oscuro);
+  color: var(--color-texto);
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+/* Botones reutilizables en toda la app */
+.btn-primary {
+  background: var(--color-dorado);
+  color: var(--color-madera-oscura);
+  border: none;
+  padding: 12px;
+  border-radius: var(--radio);
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-secondary {
+  background: var(--color-marfil);
+  color: var(--color-madera-oscura);
+  border: 1px solid var(--color-borde);
+  padding: 12px;
+  border-radius: var(--radio);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-peligro {
+  background: var(--color-error);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radio);
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+}
+
+input {
+  padding: 12px;
+  border-radius: var(--radio);
+  border: 1px solid var(--color-borde);
+  font-size: 14px;
+  width: 100%;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-madera-oscura);
+  display: block;
+  margin-bottom: 4px;
+}
