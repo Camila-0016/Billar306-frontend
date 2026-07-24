@@ -25,3 +25,7 @@
 .login-screen input {
   margin-bottom: 16px;
 }
+
+.login-error {
+  background: #ffebee;
+}
