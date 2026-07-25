@@ -34,6 +34,7 @@ export default function MesaDetalle() {
   const [clienteNombre, setClienteNombre] = useState("");
   const [modalCierre, setModalCierre] = useState(false);
   const [empleadoCierreSeleccionado, setEmpleadoCierreSeleccionado] = useState("");
+  const [ticket, setTicket] = useState(null);
 
   async function cargar() {
     try {
@@ -147,7 +148,16 @@ export default function MesaDetalle() {
         return;
       }
       await cerrarSesion(sesion.id, Number(empleadoCierreSeleccionado));
-      navigate("/mesas");
+
+      const sesionFinal = await obtenerSesion(sesion.id);
+      const ventaFinal = sesionFinal.ventaConfiteriaId ? await obtenerVenta(sesionFinal.ventaConfiteriaId) : null;
+
+      setModalCierre(false);
+      setTicket({
+        sesion: sesionFinal,
+        venta: ventaFinal,
+        empleadoCierre: nombreDe(Number(empleadoCierreSeleccionado)),
+      });
     } catch (e) {
       setErrorModal(e.message);
     }
@@ -159,7 +169,7 @@ export default function MesaDetalle() {
   return (
     <div className="mesa-detalle">
       <div className="mesa-detalle-header">
-        <button className="volver-btn" onClick={() => navigate("/mesas")}>
+        <button className="volver-btn" onClick={() => navigate(-1)}>
           <ArrowLeft size={20} />
         </button>
         <span>Mesa {numeroMesa} — Detalle</span>
@@ -212,20 +222,27 @@ export default function MesaDetalle() {
           <span>${sesion.totalActual.toLocaleString("es-AR")}</span>
         </div>
 
-        <button className="btn-secondary" style={{ marginTop: 14 }} onClick={abrirModalConsumicion}>
-          + AGREGAR CONSUMICIÓN
-        </button>
-        <button
-          className="btn-peligro"
-          style={{ marginTop: 10 }}
-          onClick={() => {
-            setEmpleadoCierreSeleccionado("");
-            setErrorModal(null);
-            setModalCierre(true);
-          }}
-        >
-          CERRAR MESA
-        </button>
+        {/* AQUÍ SE INTEGRA EL BLOQUE CONDICIONAL */}
+        {!sesion.fechaFin ? (
+          <>
+            <button className="btn-secondary" style={{ marginTop: 14 }} onClick={abrirModalConsumicion}>
+              + AGREGAR CONSUMICIÓN
+            </button>
+            <button
+              className="btn-peligro"
+              style={{ marginTop: 10 }}
+              onClick={() => {
+                setEmpleadoCierreSeleccionado("");
+                setErrorModal(null);
+                setModalCierre(true);
+              }}
+            >
+              CERRAR MESA
+            </button>
+          </>
+        ) : (
+          <div className="badge-cerrada" style={{ textAlign: "center", marginTop: 14, fontWeight: "bold" }}>MESA CERRADA</div>
+        )}
       </div>
 
       {modalConsumicion && (
@@ -278,6 +295,34 @@ export default function MesaDetalle() {
           <button className="btn-peligro" style={{ marginTop: 14 }} onClick={confirmarCierre}>
             CONFIRMAR CIERRE
           </button>
+        </Modal>
+      )}
+
+      {ticket && (
+        <Modal title="Mesa cerrada" onClose={() => navigate(-1)}>
+          <div className="ticket">
+            <div className="ticket-linea"><span>Mesa</span><span>{numeroMesa}</span></div>
+            <div className="ticket-linea"><span>Cliente</span><span>{clienteNombre}</span></div>
+            <div className="ticket-linea"><span>Desde</span><span>{formatearHora(ticket.sesion.fechaInicio)}</span></div>
+            <div className="ticket-linea"><span>Hasta</span><span>{formatearHora(ticket.sesion.fechaFin)}</span></div>
+            <div className="ticket-linea"><span>Tiempo de mesa</span><span>${ticket.sesion.montoSesionMesa.toLocaleString("es-AR")}</span></div>
+
+            {ticket.venta && ticket.venta.items.length > 0 && (
+              <>
+                <div className="ticket-subtitulo">Consumiciones</div>
+                {ticket.venta.items.map((i) => (
+                  <div className="ticket-linea" key={i.id}>
+                    <span>{i.cantidad}x {i.nombre}</span>
+                    <span>${i.total.toLocaleString("es-AR")}</span>
+                  </div>
+                ))}
+              </>
+            )}
+
+            <div className="ticket-linea ticket-total"><span>TOTAL</span><span>${ticket.sesion.total.toLocaleString("es-AR")}</span></div>
+            <div className="ticket-linea"><span>Cerró</span><span>{ticket.empleadoCierre}</span></div>
+          </div>
+          <button className="btn-primary" style={{ marginTop: 14 }} onClick={() => navigate(-1)}>LISTO</button>
         </Modal>
       )}
     </div>

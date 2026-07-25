@@ -8,6 +8,12 @@ import MesaDetalle from "./pages/Mesas/MesaDetalle";
 import Venta from "./pages/Venta/Venta";
 import Clientes from "./pages/Clientes/Clientes";
 import Mas from "./pages/Mas/Mas";
+import Configuracion from "./pages/Mas/Configuracion";
+import Catalogo from "./pages/Mas/Catalogo";
+import DiasLaborales from "./pages/Mas/DiasLaborales";
+import DiaLaboralDetalle from "./pages/Mas/DiaLaboralDetalle";
+import TurnoDetalle from "./pages/Mas/TurnoDetalle";
+import RutaSoloJefe from "./components/RutaSoloJefe";
 
 export default function App() {
   return (
@@ -28,6 +34,11 @@ export default function App() {
         <Route path="/venta" element={<Venta />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/mas" element={<Mas />} />
+        <Route path="/mas/configuracion" element={<RutaSoloJefe><Configuracion /></RutaSoloJefe>} />
+        <Route path="/mas/catalogo" element={<RutaSoloJefe><Catalogo /></RutaSoloJefe>} />
+        <Route path="/mas/dias-laborales" element={<DiasLaborales />} />
+        <Route path="/mas/dias-laborales/:id" element={<DiaLaboralDetalle />} />
+        <Route path="/mas/turno/:id" element={<TurnoDetalle />} />
       </Route>
     </Routes>
   );

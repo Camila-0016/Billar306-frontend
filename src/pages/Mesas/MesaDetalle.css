@@ -124,3 +124,37 @@
   text-align: center;
   font-weight: bold;
 }
+
+.ticket {
+  font-size: 13px;
+}
+.ticket-linea {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #ddd;
+}
+.ticket-subtitulo {
+  font-weight: bold;
+  font-size: 12px;
+  margin: 10px 0 4px;
+  color: var(--color-fieltro);
+}
+.ticket-total {
+  font-weight: bold;
+  font-size: 15px;
+  border-bottom: none;
+  border-top: 2px solid var(--color-madera-oscura);
+  margin-top: 6px;
+  padding-top: 8px;
+}
+.badge-cerrada {
+  text-align: center;
+  background: #eee;
+  color: #888;
+  padding: 10px;
+  border-radius: var(--radio);
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: 14px;
+}
