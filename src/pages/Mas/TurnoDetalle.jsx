@@ -62,12 +62,17 @@ export default function TurnoDetalle() {
         </p>
 
         <h4 className="seccion-titulo">Horas trabajadas</h4>
-        {reporte.horas.map((h) => (
-          <div key={h.id} className="fila-detalle">
-            <span>{nombreDe(h.empleadoId)}</span>
-            <span>{formatearHoras(h.horasTrabajadas)}</span>
-          </div>
-        ))}
+{reporte.horas.map((h) => (
+  <div key={h.id} className="fila-detalle">
+    <span>{nombreDe(h.empleadoId)}</span>
+    <span>
+      {formatearHora(h.fechaInicio)}
+      {h.salida ? ` → ${formatearHora(h.salida)}` : " → en curso"}
+      {" · "}
+      {formatearHoras(h.horasTrabajadas)}
+    </span>
+  </div>
+))}
 
         <h4 className="seccion-titulo">Mesas atendidas</h4>
         {reporte.mesas.length === 0 && <p className="hint-texto">Sin mesas en este turno.</p>}
@@ -82,14 +87,18 @@ export default function TurnoDetalle() {
   </div>
 ))}
 
-        <h4 className="seccion-titulo">Ventas directas</h4>
-        {reporte.ventasDirectas.length === 0 && <p className="hint-texto">Sin ventas directas en este turno.</p>}
-        {reporte.ventasDirectas.map((v) => (
-          <div key={v.cuentaId} className="fila-detalle">
-            <span>{v.cliente}</span>
-            <span>${v.total.toLocaleString("es-AR")}</span>
-          </div>
-        ))}
+    <h4 className="seccion-titulo">Ventas directas</h4>
+{reporte.ventasDirectas.length === 0 && <p className="hint-texto">Sin ventas directas en este turno.</p>}
+{reporte.ventasDirectas.map((v) => (
+  <div
+    key={v.cuentaId}
+    className="fila-detalle clickable"
+    onClick={() => navigate(`/mesas/${v.cuentaId}`)}
+  >
+    <span>{v.cliente}</span>
+    <span>${v.total.toLocaleString("es-AR")}</span>
+  </div>
+))}
 
         <h4 className="seccion-titulo">Productos vendidos</h4>
 {reporte.productosVendidos.length === 0 && <p className="hint-texto">Sin ventas de confitería en este turno.</p>}

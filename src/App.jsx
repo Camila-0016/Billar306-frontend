@@ -14,6 +14,7 @@ import DiasLaborales from "./pages/Mas/DiasLaborales";
 import DiaLaboralDetalle from "./pages/Mas/DiaLaboralDetalle";
 import TurnoDetalle from "./pages/Mas/TurnoDetalle";
 import RutaSoloJefe from "./components/RutaSoloJefe";
+import Salida from "./pages/Salida/Salida";
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/mas/dias-laborales" element={<DiasLaborales />} />
         <Route path="/mas/dias-laborales/:id" element={<DiaLaboralDetalle />} />
         <Route path="/mas/turno/:id" element={<TurnoDetalle />} />
+        <Route path="/salida" element={<Salida />} />
       </Route>
     </Routes>
   );

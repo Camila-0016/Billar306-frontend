@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import InfoCard from "../../components/InfoCard";
 import { Clock } from "lucide-react";
@@ -6,7 +7,6 @@ import { formatearHora } from "../../utils/fecha";
 import {
   listarDiasLaborales,
   abrirDiaLaboral,
-  cerrarDiaLaboral,
 } from "../../api/diaLaboral";
 import {
   listarTurnos,
@@ -14,11 +14,11 @@ import {
   obtenerActivos,
   asignarAuxiliar,
   retirarAuxiliar,
-  cerrarTurno,
 } from "../../api/turnos";
 import { listarUsuarios } from "../../api/usuarios";
 
 export default function Turno() {
+  const navigate = useNavigate();
   const [diaLaboral, setDiaLaboral] = useState(null);
   const [turno, setTurno] = useState(null);
   const [activos, setActivos] = useState([]);
@@ -112,15 +112,6 @@ export default function Turno() {
           </button>
         )}
 
-        {diaLaboral && !turno && (
-          <button
-            className="btn-secondary"
-            style={{ marginTop: 10 }}
-            onClick={() => accion(() => cerrarDiaLaboral(diaLaboral.id))}
-          >
-            CERRAR DÍA LABORAL
-          </button>
-        )}
       </InfoCard>
 
       {/* --- SIN TURNO ABIERTO --- */}
@@ -160,25 +151,15 @@ export default function Turno() {
           </div>
 
           <label style={{ marginTop: 12 }}>Presentes ahora</label>
-          {activos.map((a) => (
-            <div className="fila" key={a.id}>
-              <span>
-                {nombreDe(a.empleadoId)}
-                {a.empleadoId === turno.titularId ? " (titular)" : " (aux.)"}
-              </span>
-              <span>
-                {formatearHora(a.fechaInicio)}
-                {a.empleadoId !== turno.titularId && (
-                  <button
-                    style={{ marginLeft: 8, color: "var(--color-error)", background: "none", border: "none", cursor: "pointer" }}
-                    onClick={() => accion(() => retirarAuxiliar(turno.id, a.empleadoId))}
-                  >
-                    ✕
-                  </button>
-                )}
-              </span>
-            </div>
-          ))}
+{activos.map((a) => (
+  <div className="fila" key={a.id}>
+    <span>
+      {nombreDe(a.empleadoId)}
+      {a.empleadoId === turno.titularId ? " (titular)" : " (aux.)"}
+    </span>
+    <span>{formatearHora(a.fechaInicio)}</span>
+  </div>
+))}
 
           <label style={{ marginTop: 12 }}>Asignar auxiliar</label>
           <select
@@ -205,13 +186,10 @@ export default function Turno() {
             + ASIGNAR AUXILIAR
           </button>
 
-          <button
-            className="btn-peligro"
-            style={{ marginTop: 10 }}
-            onClick={() => accion(() => cerrarTurno(turno.id))}
-          >
-            CERRAR TURNO
+          <button className="btn-peligro" style={{ marginTop: 10 }} onClick={() => navigate("/salida")}>
+            REGISTRAR MI SALIDA
           </button>
+
         </InfoCard>
       )}
     </>

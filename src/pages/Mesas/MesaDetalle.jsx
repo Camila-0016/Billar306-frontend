@@ -50,7 +50,9 @@ export default function MesaDetalle() {
         listarMesas(),
       ]);
       setUsuarios(usuariosData);
-      setNumeroMesa(mesas.find((m) => m.id === sesionData.mesaId)?.numero ?? "-");
+      
+      const mesaEncontrada = mesas.find((m) => m.id === sesionData.mesaId);
+      setNumeroMesa(mesaEncontrada?.numero ?? null);
       
       const cliente = await obtenerCliente(sesionData.clienteId);
       setClienteNombre(cliente?.nombreCompleto ?? "—");
@@ -169,29 +171,33 @@ export default function MesaDetalle() {
   return (
     <div className="mesa-detalle">
       <div className="mesa-detalle-header">
-        <button className="volver-btn" onClick={() => navigate(-1)}>
-          <ArrowLeft size={20} />
-        </button>
-        <span>Mesa {numeroMesa} — Detalle</span>
-      </div>
+  <button className="volver-btn" onClick={() => navigate(-1)}>
+    <ArrowLeft size={20} />
+  </button>
+  <span>{numeroMesa != null && numeroMesa !== "-" ? `Mesa ${numeroMesa}` : "Venta directa"}</span>
+</div>
 
       <div className="mesa-detalle-body">
         {error && <div className="error-msg">{error}</div>}
 
         <div className="fila-detalle">
-          <span>Cliente</span>
-          <span>{clienteNombre}</span>
-        </div>
-        
-        <div className="fila-detalle">
-          <span>Desde</span>
-          <span>{formatearHora(sesion.fechaInicio)}</span>
-        </div>
-
-        <div className="fila-detalle">
-          <span>Tiempo de mesa</span>
-          <span>${sesion.montoMesaActual.toLocaleString("es-AR")}</span>
-        </div>
+  <span>Cliente</span>
+  <span>{clienteNombre}</span>
+</div>
+<div className="fila-detalle">
+  <span>Desde</span>
+  <span>{formatearHora(sesion.fechaInicio)}</span>
+</div>
+<div className="fila-detalle">
+  <span>Hasta</span>
+  <span>{sesion.fechaFin ? formatearHora(sesion.fechaFin) : "en curso"}</span>
+</div>
+{sesion.mesaId != null && (
+  <div className="fila-detalle">
+    <span>Tiempo de mesa</span>
+    <span>${sesion.montoMesaActual.toLocaleString("es-AR")}</span>
+  </div>
+)}
         
         {venta && venta.items.length > 0 && (
           <>
