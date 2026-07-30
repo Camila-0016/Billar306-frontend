@@ -2,27 +2,31 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { listarDiasLaborales } from "../../api/diaLaboral";
-import { formatearHora } from "../../utils/fecha";
 import { useAuth } from "../../context/AuthContext";
+import { formatearHora, formatearFecha, parsearFechaUtc } from "../../utils/fecha";
 import "./SubPagina.css";
 
 export default function DiasLaborales() {
   const navigate = useNavigate();
+  const { sesion } = useAuth();
   const [dias, setDias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
-  const { sesion } = useAuth();
 
   useEffect(() => {
-  listarDiasLaborales()
-    .then((data) => {
-      const ordenados = data.slice().reverse();
-      const filtrados = sesion?.rol === "Jefe" ? ordenados : ordenados.filter((d) => !d.estaCerrado);
-      setDias(filtrados);
-    })
-    .catch((e) => setError(e.message))
-    .finally(() => setCargando(false));
-}, [sesion]);
+    listarDiasLaborales()
+      .then((data) => {
+        const ascendente = data
+          .slice()
+          .sort((a, b) => parsearFechaUtc(a.fechaInicio) - parsearFechaUtc(b.fechaInicio));
+        const numerados = ascendente.map((d, i) => ({ ...d, numero: i + 1 }));
+        const visibles = sesion?.rol === "Jefe" ? numerados : numerados.filter((d) => !d.estaCerrado);
+        setDias(visibles.slice().reverse());
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setCargando(false));
+  }, [sesion]);
+
   if (cargando) return <p style={{ padding: 16 }}>Cargando...</p>;
 
   return (
@@ -36,15 +40,26 @@ export default function DiasLaborales() {
       <div className="subpagina-body">
         {error && <div className="error-msg">{error}</div>}
         {dias.map((dia) => (
-          <div key={dia.id} className="dia-card" onClick={() => navigate(`/mas/dias-laborales/${dia.id}`)}>
-            <div className="dia-fecha">
-              <span className={`estado-dot ${dia.estaCerrado ? "cerrado" : "abierto"}`} />
-              {dia.estaCerrado ? "Cerrado" : "Abierto"} — desde {formatearHora(dia.fechaInicio)}
-              {dia.estaCerrado && ` hasta ${formatearHora(dia.fechaCierre)}`}
+          <div
+            key={dia.id}
+            className={`dia-card ${dia.estaCerrado ? "cerrado" : "abierto"}`}
+            onClick={() => navigate(`/mas/dias-laborales/${dia.id}`)}
+          >
+            <div className="dia-card-top">
+              <span className="dia-titulo">Día Laboral #{dia.numero}</span>
+              <span className={`estado-badge ${dia.estaCerrado ? "cerrado" : "abierto"}`}>
+                {dia.estaCerrado ? "CERRADO" : "ABIERTO"}
+              </span>
+            </div>
+            <div className="dia-fecha-texto">{formatearFecha(dia.fechaInicio)}</div>
+            <div className="hint-texto">
+              {dia.estaCerrado
+                ? `${formatearHora(dia.fechaInicio)} a ${formatearHora(dia.fechaCierre)} hs`
+                : `Desde las ${formatearHora(dia.fechaInicio)} hs`}
             </div>
           </div>
         ))}
-        {dias.length === 0 && <p className="hint-texto">No hay días laborales registrados.</p>}
+        {dias.length === 0 && <p className="hint-texto">No hay días laborales para mostrar.</p>}
       </div>
     </div>
   );

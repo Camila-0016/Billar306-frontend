@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { obtenerSesion, cerrarSesion } from "../../api/sesionesMesa";
+import { obtenerCuenta } from "../../api/cuentas";
+import { cerrarSesion } from "../../api/sesionesMesa";
 import { obtenerVenta, agregarAMesa, quitarItem } from "../../api/confiteria";
 import { listarCatalogos, listarProductosPorCatalogo } from "../../api/productos";
 import { listarTurnos, obtenerActivos } from "../../api/turnos";
 import { listarUsuarios } from "../../api/usuarios";
-import { listarMesas } from "../../api/mesas";
 import { obtenerCliente } from "../../api/clientes";
-import { formatearHora, parsearFechaUtc } from "../../utils/fecha";
+import { formatearHora, formatearDuracion, parsearFechaUtc } from "../../utils/fecha";
 import Modal from "../../components/Modal";
 import "./MesaDetalle.css";
 
@@ -16,9 +16,9 @@ export default function MesaDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [sesion, setSesion] = useState(null);
+  const [cuenta, setCuenta] = useState(null);
   const [venta, setVenta] = useState(null);
-  const [numeroMesa, setNumeroMesa] = useState(null);
+  const [clienteNombre, setClienteNombre] = useState("");
   const [usuarios, setUsuarios] = useState([]);
   const [empleadosActivos, setEmpleadosActivos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -31,7 +31,7 @@ export default function MesaDetalle() {
   const [cantidades, setCantidades] = useState({});
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState("");
   const [errorModal, setErrorModal] = useState(null);
-  const [clienteNombre, setClienteNombre] = useState("");
+
   const [modalCierre, setModalCierre] = useState(false);
   const [empleadoCierreSeleccionado, setEmpleadoCierreSeleccionado] = useState("");
   const [ticket, setTicket] = useState(null);
@@ -39,23 +39,16 @@ export default function MesaDetalle() {
   async function cargar() {
     try {
       setError(null);
-      const sesionData = await obtenerSesion(id);
-      setSesion(sesionData);
+      const cuentaData = await obtenerCuenta(id);
+      setCuenta(cuentaData);
 
-      setVenta(sesionData.ventaConfiteriaId ? await obtenerVenta(sesionData.ventaConfiteriaId) : null);
-
-      const [usuariosData, turnos, mesas] = await Promise.all([
-        listarUsuarios(),
-        listarTurnos(),
-        listarMesas(),
-      ]);
-      setUsuarios(usuariosData);
-      
-      const mesaEncontrada = mesas.find((m) => m.id === sesionData.mesaId);
-      setNumeroMesa(mesaEncontrada?.numero ?? null);
-      
-      const cliente = await obtenerCliente(sesionData.clienteId);
+      const cliente = await obtenerCliente(cuentaData.clienteId);
       setClienteNombre(cliente?.nombreCompleto ?? "—");
+
+      setVenta(cuentaData.ventaConfiteriaId ? await obtenerVenta(cuentaData.ventaConfiteriaId) : null);
+
+      const [usuariosData, turnos] = await Promise.all([listarUsuarios(), listarTurnos()]);
+      setUsuarios(usuariosData);
 
       const turnoAbierto = turnos.find((t) => !t.salida);
       setEmpleadosActivos(turnoAbierto ? await obtenerActivos(turnoAbierto.id) : []);
@@ -125,7 +118,7 @@ export default function MesaDetalle() {
         return;
       }
 
-      await agregarAMesa(sesion.id, Number(empleadoSeleccionado), items);
+      await agregarAMesa(cuenta.id, Number(empleadoSeleccionado), items);
       setModalConsumicion(false);
       await cargar();
     } catch (e) {
@@ -149,14 +142,14 @@ export default function MesaDetalle() {
         setErrorModal("Seleccioná qué empleado cierra la mesa.");
         return;
       }
-      await cerrarSesion(sesion.id, Number(empleadoCierreSeleccionado));
+      await cerrarSesion(cuenta.id, Number(empleadoCierreSeleccionado));
 
-      const sesionFinal = await obtenerSesion(sesion.id);
-      const ventaFinal = sesionFinal.ventaConfiteriaId ? await obtenerVenta(sesionFinal.ventaConfiteriaId) : null;
+      const cuentaFinal = await obtenerCuenta(cuenta.id);
+      const ventaFinal = cuentaFinal.ventaConfiteriaId ? await obtenerVenta(cuentaFinal.ventaConfiteriaId) : null;
 
       setModalCierre(false);
       setTicket({
-        sesion: sesionFinal,
+        cuenta: cuentaFinal,
         venta: ventaFinal,
         empleadoCierre: nombreDe(Number(empleadoCierreSeleccionado)),
       });
@@ -166,42 +159,67 @@ export default function MesaDetalle() {
   }
 
   if (cargando) return <p style={{ padding: 16 }}>Cargando...</p>;
-  if (!sesion) return <p style={{ padding: 16 }}>Mesa no encontrada.</p>;
+  if (error) return <p style={{ padding: 16 }} className="error-msg">{error}</p>;
+  if (!cuenta) return <p style={{ padding: 16 }}>No se encontró la cuenta.</p>;
+
+  const esMesa = cuenta.mesaId != null;
 
   return (
     <div className="mesa-detalle">
       <div className="mesa-detalle-header">
-  <button className="volver-btn" onClick={() => navigate(-1)}>
-    <ArrowLeft size={20} />
-  </button>
-  <span>{numeroMesa != null && numeroMesa !== "-" ? `Mesa ${numeroMesa}` : "Venta directa"}</span>
-</div>
+        <button className="volver-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={20} />
+        </button>
+        <span>{esMesa ? `Mesa ${cuenta.numeroMesa}` : "Venta directa"}</span>
+      </div>
 
       <div className="mesa-detalle-body">
-        {error && <div className="error-msg">{error}</div>}
-
         <div className="fila-detalle">
-  <span>Cliente</span>
-  <span>{clienteNombre}</span>
-</div>
-<div className="fila-detalle">
-  <span>Desde</span>
-  <span>{formatearHora(sesion.fechaInicio)}</span>
-</div>
-<div className="fila-detalle">
-  <span>Hasta</span>
-  <span>{sesion.fechaFin ? formatearHora(sesion.fechaFin) : "en curso"}</span>
-</div>
-{sesion.mesaId != null && (
-  <div className="fila-detalle">
-    <span>Tiempo de mesa</span>
-    <span>${sesion.montoMesaActual.toLocaleString("es-AR")}</span>
-  </div>
-)}
-        
+          <span>Cliente</span>
+          <span>{clienteNombre}</span>
+        </div>
+
+        {esMesa ? (
+          <>
+            <div className="fila-detalle">
+              <span>Desde</span>
+              <span>{formatearHora(cuenta.fechaInicio)}</span>
+            </div>
+            <div className="fila-detalle">
+              <span>Hasta</span>
+              <span>{cuenta.fechaFin ? formatearHora(cuenta.fechaFin) : "en curso"}</span>
+            </div>
+            <div className="fila-detalle">
+              <span>Abrió</span>
+              <span>{nombreDe(cuenta.empleadoAperturaId)}</span>
+            </div>
+            {esMesa && cuenta.empleadoCierreId && (
+              <div className="fila-detalle">
+                <span>Cerró</span>
+                <span>{nombreDe(cuenta.empleadoCierreId)}</span>
+              </div>
+            )}
+            <div className="fila-detalle">
+              <span>Tiempo de mesa ({formatearDuracion(cuenta.fechaInicio, cuenta.fechaFin, ahora)})</span>
+              <span>${cuenta.montoMesaActual.toLocaleString("es-AR")}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="fila-detalle">
+              <span>Realizada</span>
+              <span>{formatearHora(cuenta.fechaInicio)}</span>
+            </div>
+            <div className="fila-detalle">
+              <span>Empleado</span>
+              <span>{nombreDe(cuenta.empleadoAperturaId)}</span>
+            </div>
+          </>
+        )}
+
         {venta && venta.items.length > 0 && (
           <>
-            <h4 className="seccion-titulo">Consumiciones activas</h4>
+            <h4 className="seccion-titulo">Consumiciones</h4>
             {venta.items.map((item) => {
               const enVentana = estaEnVentana(item.fechaInicio);
               return (
@@ -225,11 +243,10 @@ export default function MesaDetalle() {
 
         <div className="fila-detalle total">
           <span>TOTAL</span>
-          <span>${sesion.totalActual.toLocaleString("es-AR")}</span>
+          <span>${cuenta.totalActual.toLocaleString("es-AR")}</span>
         </div>
 
-        {/* AQUÍ SE INTEGRA EL BLOQUE CONDICIONAL */}
-        {!sesion.fechaFin ? (
+        {esMesa && !cuenta.fechaFin && (
           <>
             <button className="btn-secondary" style={{ marginTop: 14 }} onClick={abrirModalConsumicion}>
               + AGREGAR CONSUMICIÓN
@@ -246,15 +263,14 @@ export default function MesaDetalle() {
               CERRAR MESA
             </button>
           </>
-        ) : (
-          <div className="badge-cerrada" style={{ textAlign: "center", marginTop: 14, fontWeight: "bold" }}>MESA CERRADA</div>
         )}
+
+        {esMesa && cuenta.fechaFin && <div className="badge-cerrada">MESA CERRADA</div>}
       </div>
 
       {modalConsumicion && (
         <Modal title="Agregar consumiciones" onClose={() => setModalConsumicion(false)}>
           {errorModal && <div className="error-msg">{errorModal}</div>}
-
           {catalogos.map((cat) => (
             <div key={cat.id}>
               <div className="categoria-titulo">{cat.categoria.toUpperCase()}</div>
@@ -273,7 +289,6 @@ export default function MesaDetalle() {
               ))}
             </div>
           ))}
-
           <label style={{ marginTop: 14 }}>Empleado</label>
           <select value={empleadoSeleccionado} onChange={(e) => setEmpleadoSeleccionado(e.target.value)}>
             <option value="">Seleccioná un empleado...</option>
@@ -281,7 +296,6 @@ export default function MesaDetalle() {
               <option key={a.empleadoId} value={a.empleadoId}>{nombreDe(a.empleadoId)}</option>
             ))}
           </select>
-
           <button className="btn-primary" style={{ marginTop: 14 }} onClick={confirmarConsumicion}>
             CONFIRMAR PEDIDO
           </button>
@@ -307,12 +321,12 @@ export default function MesaDetalle() {
       {ticket && (
         <Modal title="Mesa cerrada" onClose={() => navigate(-1)}>
           <div className="ticket">
-            <div className="ticket-linea"><span>Mesa</span><span>{numeroMesa}</span></div>
+            <div className="ticket-linea"><span>Mesa</span><span>{ticket.cuenta.numeroMesa}</span></div>
             <div className="ticket-linea"><span>Cliente</span><span>{clienteNombre}</span></div>
-            <div className="ticket-linea"><span>Desde</span><span>{formatearHora(ticket.sesion.fechaInicio)}</span></div>
-            <div className="ticket-linea"><span>Hasta</span><span>{formatearHora(ticket.sesion.fechaFin)}</span></div>
-            <div className="ticket-linea"><span>Tiempo de mesa</span><span>${ticket.sesion.montoSesionMesa.toLocaleString("es-AR")}</span></div>
-
+            <div className="ticket-linea"><span>Desde</span><span>{formatearHora(ticket.cuenta.fechaInicio)}</span></div>
+            <div className="ticket-linea"><span>Hasta</span><span>{formatearHora(ticket.cuenta.fechaFin)}</span></div>
+            <div className="ticket-linea"><span>Abrió</span><span>{nombreDe(ticket.cuenta.empleadoAperturaId)}</span></div>
+            <div className="ticket-linea"><span>Tiempo de mesa</span><span>${ticket.cuenta.montoMesaActual.toLocaleString("es-AR")}</span></div>
             {ticket.venta && ticket.venta.items.length > 0 && (
               <>
                 <div className="ticket-subtitulo">Consumiciones</div>
@@ -324,8 +338,7 @@ export default function MesaDetalle() {
                 ))}
               </>
             )}
-
-            <div className="ticket-linea ticket-total"><span>TOTAL</span><span>${ticket.sesion.total.toLocaleString("es-AR")}</span></div>
+            <div className="ticket-linea ticket-total"><span>TOTAL</span><span>${ticket.cuenta.totalActual.toLocaleString("es-AR")}</span></div>
             <div className="ticket-linea"><span>Cerró</span><span>{ticket.empleadoCierre}</span></div>
           </div>
           <button className="btn-primary" style={{ marginTop: 14 }} onClick={() => navigate(-1)}>LISTO</button>

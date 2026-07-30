@@ -66,11 +66,9 @@ export default function TurnoDetalle() {
   <div key={h.id} className="fila-detalle">
     <span>{nombreDe(h.empleadoId)}</span>
     <span>
-      {formatearHora(h.fechaInicio)}
-      {h.salida ? ` → ${formatearHora(h.salida)}` : " → en curso"}
-      {" · "}
-      {formatearHoras(h.horasTrabajadas)}
-    </span>
+  {formatearHora(h.fechaInicio)}
+  {h.salida ? ` → ${formatearHora(h.salida)} · ${formatearHoras(h.horasTrabajadas)}` : " → en curso"}
+</span>
   </div>
 ))}
 
