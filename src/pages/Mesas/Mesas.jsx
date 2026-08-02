@@ -6,16 +6,13 @@ import Modal from "../../components/Modal";
 import { listarMesas } from "../../api/mesas";
 import { listarSesionesAbiertas, abrirSesion } from "../../api/sesionesMesa";
 import { buscarClientes } from "../../api/clientes";
-import { listarUsuarios } from "../../api/usuarios";
-import { listarTurnos, obtenerActivos } from "../../api/turnos";
+import { listarTurnos } from "../../api/turnos";
 import "./Mesas.css";
 
 export default function Mesas() {
   const navigate = useNavigate();
   const [mesas, setMesas] = useState([]);
   const [sesiones, setSesiones] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
-  const [empleadosActivos, setEmpleadosActivos] = useState([]);
   const [turnoAbierto, setTurnoAbierto] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -25,25 +22,21 @@ export default function Mesas() {
   const [resultadosCliente, setResultadosCliente] = useState([]);
   const [clienteElegido, setClienteElegido] = useState(null);
   const [nombreClienteNuevo, setNombreClienteNuevo] = useState("");
-  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState("");
   const [errorModal, setErrorModal] = useState(null);
 
   async function cargar() {
     try {
       setError(null);
-      const [mesasData, sesionesData, usuariosData, turnosData] = await Promise.all([
+      const [mesasData, sesionesData, turnosData] = await Promise.all([
         listarMesas(),
         listarSesionesAbiertas(),
-        listarUsuarios(),
         listarTurnos(),
       ]);
       setMesas(mesasData);
       setSesiones(sesionesData);
-      setUsuarios(usuariosData);
 
       const abierto = turnosData.find((t) => !t.salida) ?? null;
       setTurnoAbierto(abierto);
-      setEmpleadosActivos(abierto ? await obtenerActivos(abierto.id) : []);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -56,10 +49,6 @@ export default function Mesas() {
     const intervalo = setInterval(cargar, 20000);
     return () => clearInterval(intervalo);
   }, []);
-
-  function nombreDe(empleadoId) {
-    return usuarios.find((u) => u.id === empleadoId)?.nombreUsuario ?? "—";
-  }
 
   function sesionDeMesa(mesaId) {
     return sesiones.find((s) => s.mesaId === mesaId);
@@ -75,47 +64,35 @@ export default function Mesas() {
     setResultadosCliente([]);
     setClienteElegido(null);
     setNombreClienteNuevo("");
-    setEmpleadoSeleccionado("");
     setErrorModal(null);
   }
 
   async function buscarClienteInput(valor) {
-  setBusquedaCliente(valor);
-  setClienteElegido(null);
-  setNombreClienteNuevo(""); // al buscar un existente, se limpia el campo de "nuevo"
-  if (valor.length < 2) {
-    setResultadosCliente([]);
-    return;
-  }
-  setResultadosCliente(await buscarClientes(valor));
-}
-
-function escribirClienteNuevo(valor) {
-  setNombreClienteNuevo(valor);
-  if (valor.length > 0) {
-    // al escribir un cliente nuevo, se limpia la búsqueda de existente
+    setBusquedaCliente(valor);
     setClienteElegido(null);
-    setBusquedaCliente("");
-    setResultadosCliente([]);
+    setNombreClienteNuevo(""); // al buscar un existente, se limpia el campo de "nuevo"
+    if (valor.length < 2) {
+      setResultadosCliente([]);
+      return;
+    }
+    setResultadosCliente(await buscarClientes(valor));
   }
-}
+
+  function escribirClienteNuevo(valor) {
+    setNombreClienteNuevo(valor);
+    if (valor.length > 0) {
+      // al escribir un cliente nuevo, se limpia la búsqueda de existente
+      setClienteElegido(null);
+      setBusquedaCliente("");
+      setResultadosCliente([]);
+    }
+  }
 
   async function confirmarApertura() {
     try {
       setErrorModal(null);
-      const tieneExistente = Boolean(clienteElegido);
-const tieneNuevo = nombreClienteNuevo.trim().length > 0;
-
-if (tieneExistente === tieneNuevo) {
-  setErrorModal(
-    tieneExistente
-      ? "No podés indicar un cliente existente y uno nuevo a la vez."
-      : "Elegí un cliente existente o escribí uno nuevo."
-  );
-  return;
-}
-      if (!empleadoSeleccionado) {
-        setErrorModal("Seleccioná qué empleado abre la mesa.");
+      if (!clienteElegido && !nombreClienteNuevo.trim()) {
+        setErrorModal("Elegí un cliente existente o escribí uno nuevo.");
         return;
       }
 
@@ -123,7 +100,6 @@ if (tieneExistente === tieneNuevo) {
         mesaId: mesaSeleccionada.id,
         clienteId: clienteElegido ? clienteElegido.id : null,
         nombreClienteNuevo: clienteElegido ? null : nombreClienteNuevo.trim(),
-        empleadoAperturaId: Number(empleadoSeleccionado),
       });
 
       setMesaSeleccionada(null);
@@ -171,43 +147,35 @@ if (tieneExistente === tieneNuevo) {
           {errorModal && <div className="error-msg">{errorModal}</div>}
 
           <label>Cliente</label>
-<input
-  placeholder="Buscar cliente..."
-  value={busquedaCliente}
-  onChange={(e) => buscarClienteInput(e.target.value)}
-  disabled={nombreClienteNuevo.length > 0}
-/>
-{resultadosCliente.map((c) => (
-  <div
-    key={c.id}
-    className={`resultado-cliente ${clienteElegido?.id === c.id ? "elegido" : ""}`}
-    onClick={() => {
-      setClienteElegido(c);
-      setBusquedaCliente(c.nombreCompleto);
-      setResultadosCliente([]);
-    }}
-  >
-    {c.nombreCompleto}
-  </div>
-))}
+          <input
+            placeholder="Buscar cliente..."
+            value={busquedaCliente}
+            onChange={(e) => buscarClienteInput(e.target.value)}
+            disabled={nombreClienteNuevo.length > 0}
+          />
+          {resultadosCliente.map((c) => (
+            <div
+              key={c.id}
+              className={`resultado-cliente ${clienteElegido?.id === c.id ? "elegido" : ""}`}
+              onClick={() => {
+                setClienteElegido(c);
+                setBusquedaCliente(c.nombreCompleto);
+                setResultadosCliente([]);
+              }}
+            >
+              {c.nombreCompleto}
+            </div>
+          ))}
 
-<div className="separador-o">— o —</div>
+          <div className="separador-o">— o —</div>
 
-<label>Cliente nuevo</label>
-<input
-  placeholder="Nombre completo"
-  value={nombreClienteNuevo}
-  onChange={(e) => escribirClienteNuevo(e.target.value)}
-  disabled={Boolean(clienteElegido)}
-/>
-
-          <label style={{ marginTop: 12 }}>Empleado que abre</label>
-          <select value={empleadoSeleccionado} onChange={(e) => setEmpleadoSeleccionado(e.target.value)}>
-            <option value="">Seleccioná un empleado...</option>
-            {empleadosActivos.map((a) => (
-              <option key={a.empleadoId} value={a.empleadoId}>{nombreDe(a.empleadoId)}</option>
-            ))}
-          </select>
+          <label>Cliente nuevo</label>
+          <input
+            placeholder="Nombre completo"
+            value={nombreClienteNuevo}
+            onChange={(e) => escribirClienteNuevo(e.target.value)}
+            disabled={Boolean(clienteElegido)}
+          />
 
           <button className="btn-primary" style={{ marginTop: 14 }} onClick={confirmarApertura}>
             ABRIR MESA

@@ -67,9 +67,12 @@ export default function DiaLaboralDetalle() {
           <div key={turno.id} className="turno-card" onClick={() => navigate(`/mas/turno/${turno.id}`)}>
             <div className="turno-card-top">
               <span className="turno-titulo">Turno #{i + 1}</span>
-              <span className="hint-texto">
-                {formatearHora(turno.fechaInicio)} — {turno.salida ? formatearHora(turno.salida) : "en curso"} hs
+              <span className={`estado-badge ${turno.salida ? "cerrado" : "abierto"}`}>
+                {turno.salida ? "CERRADO" : "ABIERTO"}
               </span>
+            </div>
+            <div className="hint-texto">
+              {formatearHora(turno.fechaInicio)} — {turno.salida ? formatearHora(turno.salida) : "en curso"} hs
             </div>
             <div className="turno-personal">
               Personal: {nombreDe(turno.titularId)} (Titular)

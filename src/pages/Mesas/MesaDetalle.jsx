@@ -20,7 +20,6 @@ export default function MesaDetalle() {
   const [venta, setVenta] = useState(null);
   const [clienteNombre, setClienteNombre] = useState("");
   const [usuarios, setUsuarios] = useState([]);
-  const [empleadosActivos, setEmpleadosActivos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [ahora, setAhora] = useState(Date.now());
@@ -29,11 +28,8 @@ export default function MesaDetalle() {
   const [catalogos, setCatalogos] = useState([]);
   const [productosPorCatalogo, setProductosPorCatalogo] = useState({});
   const [cantidades, setCantidades] = useState({});
-  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState("");
   const [errorModal, setErrorModal] = useState(null);
 
-  const [modalCierre, setModalCierre] = useState(false);
-  const [empleadoCierreSeleccionado, setEmpleadoCierreSeleccionado] = useState("");
   const [ticket, setTicket] = useState(null);
 
   async function cargar() {
@@ -47,11 +43,8 @@ export default function MesaDetalle() {
 
       setVenta(cuentaData.ventaConfiteriaId ? await obtenerVenta(cuentaData.ventaConfiteriaId) : null);
 
-      const [usuariosData, turnos] = await Promise.all([listarUsuarios(), listarTurnos()]);
+      const [usuariosData] = await Promise.all([listarUsuarios()]);
       setUsuarios(usuariosData);
-
-      const turnoAbierto = turnos.find((t) => !t.salida);
-      setEmpleadosActivos(turnoAbierto ? await obtenerActivos(turnoAbierto.id) : []);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -81,7 +74,6 @@ export default function MesaDetalle() {
   async function abrirModalConsumicion() {
     setErrorModal(null);
     setCantidades({});
-    setEmpleadoSeleccionado("");
 
     const cats = await listarCatalogos();
     setCatalogos(cats);
@@ -113,12 +105,8 @@ export default function MesaDetalle() {
         setErrorModal("Agregá al menos un producto con el +.");
         return;
       }
-      if (!empleadoSeleccionado) {
-        setErrorModal("Seleccioná qué empleado registra el pedido.");
-        return;
-      }
 
-      await agregarAMesa(cuenta.id, Number(empleadoSeleccionado), items);
+      await agregarAMesa(cuenta.id, items);
       setModalConsumicion(false);
       await cargar();
     } catch (e) {
@@ -138,21 +126,12 @@ export default function MesaDetalle() {
   async function confirmarCierre() {
     try {
       setErrorModal(null);
-      if (!empleadoCierreSeleccionado) {
-        setErrorModal("Seleccioná qué empleado cierra la mesa.");
-        return;
-      }
-      await cerrarSesion(cuenta.id, Number(empleadoCierreSeleccionado));
+      await cerrarSesion(cuenta.id);
 
       const cuentaFinal = await obtenerCuenta(cuenta.id);
       const ventaFinal = cuentaFinal.ventaConfiteriaId ? await obtenerVenta(cuentaFinal.ventaConfiteriaId) : null;
 
-      setModalCierre(false);
-      setTicket({
-        cuenta: cuentaFinal,
-        venta: ventaFinal,
-        empleadoCierre: nombreDe(Number(empleadoCierreSeleccionado)),
-      });
+      setTicket({ cuenta: cuentaFinal, venta: ventaFinal });
     } catch (e) {
       setErrorModal(e.message);
     }
@@ -254,11 +233,7 @@ export default function MesaDetalle() {
             <button
               className="btn-peligro"
               style={{ marginTop: 10 }}
-              onClick={() => {
-                setEmpleadoCierreSeleccionado("");
-                setErrorModal(null);
-                setModalCierre(true);
-              }}
+              onClick={confirmarCierre}
             >
               CERRAR MESA
             </button>
@@ -289,31 +264,8 @@ export default function MesaDetalle() {
               ))}
             </div>
           ))}
-          <label style={{ marginTop: 14 }}>Empleado</label>
-          <select value={empleadoSeleccionado} onChange={(e) => setEmpleadoSeleccionado(e.target.value)}>
-            <option value="">Seleccioná un empleado...</option>
-            {empleadosActivos.map((a) => (
-              <option key={a.empleadoId} value={a.empleadoId}>{nombreDe(a.empleadoId)}</option>
-            ))}
-          </select>
           <button className="btn-primary" style={{ marginTop: 14 }} onClick={confirmarConsumicion}>
             CONFIRMAR PEDIDO
-          </button>
-        </Modal>
-      )}
-
-      {modalCierre && (
-        <Modal title="Cerrar mesa" onClose={() => setModalCierre(false)}>
-          {errorModal && <div className="error-msg">{errorModal}</div>}
-          <label>¿Qué empleado cierra?</label>
-          <select value={empleadoCierreSeleccionado} onChange={(e) => setEmpleadoCierreSeleccionado(e.target.value)}>
-            <option value="">Seleccioná un empleado...</option>
-            {empleadosActivos.map((a) => (
-              <option key={a.empleadoId} value={a.empleadoId}>{nombreDe(a.empleadoId)}</option>
-            ))}
-          </select>
-          <button className="btn-peligro" style={{ marginTop: 14 }} onClick={confirmarCierre}>
-            CONFIRMAR CIERRE
           </button>
         </Modal>
       )}
@@ -326,7 +278,10 @@ export default function MesaDetalle() {
             <div className="ticket-linea"><span>Desde</span><span>{formatearHora(ticket.cuenta.fechaInicio)}</span></div>
             <div className="ticket-linea"><span>Hasta</span><span>{formatearHora(ticket.cuenta.fechaFin)}</span></div>
             <div className="ticket-linea"><span>Abrió</span><span>{nombreDe(ticket.cuenta.empleadoAperturaId)}</span></div>
-            <div className="ticket-linea"><span>Tiempo de mesa</span><span>${ticket.cuenta.montoMesaActual.toLocaleString("es-AR")}</span></div>
+            <div className="ticket-linea">
+            <span>Tiempo de mesa ({formatearDuracion(ticket.cuenta.fechaInicio, ticket.cuenta.fechaFin, ahora)})</span>
+            <span>${ticket.cuenta.montoMesaActual.toLocaleString("es-AR")}</span>
+            </div>
             {ticket.venta && ticket.venta.items.length > 0 && (
               <>
                 <div className="ticket-subtitulo">Consumiciones</div>
@@ -339,7 +294,7 @@ export default function MesaDetalle() {
               </>
             )}
             <div className="ticket-linea ticket-total"><span>TOTAL</span><span>${ticket.cuenta.totalActual.toLocaleString("es-AR")}</span></div>
-            <div className="ticket-linea"><span>Cerró</span><span>{ticket.empleadoCierre}</span></div>
+            <div className="ticket-linea"><span>Cerró</span><span>{nombreDe(ticket.cuenta.empleadoCierreId)}</span></div>
           </div>
           <button className="btn-primary" style={{ marginTop: 14 }} onClick={() => navigate(-1)}>LISTO</button>
         </Modal>

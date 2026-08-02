@@ -16,22 +16,22 @@ export default function Salida() {
   const [aviso, setAviso] = useState(null);
 
   useEffect(() => {
-    obtenerEstadoSalida(sesion.usuarioId)
-      .then(setEstado)
-      .catch((e) => setError(e.message))
-      .finally(() => setCargando(false));
-  }, []);
+  obtenerEstadoSalida()
+    .then(setEstado)
+    .catch((e) => setError(e.message))
+    .finally(() => setCargando(false));
+}, []);
 
-  async function confirmar() {
-    try {
-      setError(null);
-      const resultado = await confirmarSalida(sesion.usuarioId, cerrarDia);
-      setAviso(resultado.mensaje);
-      setConfirmado(true);
-    } catch (e) {
-      setError(e.message);
-    }
+async function confirmar() {
+  try {
+    setError(null);
+    const resultado = await confirmarSalida(cerrarDia);
+    setAviso(resultado.mensaje);
+    setConfirmado(true);
+  } catch (e) {
+    setError(e.message);
   }
+}
 
   if (cargando) return <p style={{ padding: 16 }}>Cargando...</p>;
 

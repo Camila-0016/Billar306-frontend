@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import InfoCard from "../../components/InfoCard";
 import { Clock } from "lucide-react";
-import { formatearHora } from "../../utils/fecha";
+import { formatearHora, parsearFechaUtc } from "../../utils/fecha";
+import { useAuth } from "../../context/AuthContext";
 import {
   listarDiasLaborales,
   abrirDiaLaboral,
@@ -25,9 +26,12 @@ export default function Turno() {
   const [usuarios, setUsuarios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const { sesion } = useAuth();
+  const estoyActivo = activos.some((a) => a.empleadoId === sesion.usuarioId);
 
   const [titularSeleccionado, setTitularSeleccionado] = useState("");
   const [auxiliarSeleccionado, setAuxiliarSeleccionado] = useState("");
+  const [turnoNumero, setTurnoNumero] = useState(null);
 
   async function cargarEstado() {
     try {
@@ -38,6 +42,16 @@ export default function Turno() {
 
       const turnos = await listarTurnos();
       const turnoAbierto = turnos.find((t) => !t.salida) ?? null;
+      if (turnoAbierto && diaAbierto) {
+        const turnosDelDia = turnos
+          .filter((t) => t.diaLaboralId === diaAbierto.id)
+          .slice()
+          .sort((a, b) => parsearFechaUtc(a.fechaInicio) - parsearFechaUtc(b.fechaInicio));
+        const idx = turnosDelDia.findIndex((t) => t.id === turnoAbierto.id);
+        setTurnoNumero(idx + 1);
+      } else {
+        setTurnoNumero(null);
+      }
       setTurno(turnoAbierto);
 
       if (turnoAbierto) {
@@ -117,23 +131,7 @@ export default function Turno() {
       {/* --- SIN TURNO ABIERTO --- */}
       {diaLaboral && !turno && (
         <InfoCard>
-          <label>¿Quién abre el turno?</label>
-          <select
-            value={titularSeleccionado}
-            onChange={(e) => setTitularSeleccionado(e.target.value)}
-          >
-            <option value="">Seleccioná un empleado...</option>
-            {usuarios.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nombreUsuario}
-              </option>
-            ))}
-          </select>
-          <button
-            className="btn-primary"
-            disabled={!titularSeleccionado}
-            onClick={() => accion(() => abrirTurno(Number(titularSeleccionado)))}
-          >
+          <button className="btn-primary" onClick={() => accion(() => abrirTurno())}>
             ABRIR TURNO
           </button>
         </InfoCard>
@@ -143,52 +141,54 @@ export default function Turno() {
       {turno && (
         <InfoCard>
           <div className="fila">
-            <span>
-              <span className="estado-dot abierto" />
-              Turno: ABIERTO
-            </span>
+            <span>Turno #{turnoNumero}</span>
+            <span className="estado-badge abierto">ABIERTO</span>
+          </div>
+          <div className="fila">
+            <span>Desde</span>
             <span>{formatearHora(turno.fechaInicio)}</span>
           </div>
 
           <label style={{ marginTop: 12 }}>Presentes ahora</label>
-{activos.map((a) => (
-  <div className="fila" key={a.id}>
-    <span>
-      {nombreDe(a.empleadoId)}
-      {a.empleadoId === turno.titularId ? " (titular)" : " (aux.)"}
-    </span>
-    <span>{formatearHora(a.fechaInicio)}</span>
-  </div>
-))}
+          {activos.map((a) => (
+            <div className="fila" key={a.id}>
+              <span>
+                {nombreDe(a.empleadoId)}
+                {a.empleadoId === turno.titularId ? " (titular)" : " (aux.)"}
+              </span>
+              <span>{formatearHora(a.fechaInicio)}</span>
+            </div>
+          ))}
 
-          <label style={{ marginTop: 12 }}>Asignar auxiliar</label>
-          <select
-            value={auxiliarSeleccionado}
-            onChange={(e) => setAuxiliarSeleccionado(e.target.value)}
-          >
-            <option value="">Seleccioná un empleado...</option>
-            {usuariosDisponibles.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nombreUsuario}
-              </option>
-            ))}
-          </select>
-          <button
-            className="btn-secondary"
-            disabled={!auxiliarSeleccionado}
-            onClick={() =>
-              accion(async () => {
-                await asignarAuxiliar(turno.id, Number(auxiliarSeleccionado));
-                setAuxiliarSeleccionado("");
-              })
-            }
-          >
-            + ASIGNAR AUXILIAR
-          </button>
+          {turno.titularId === sesion.usuarioId && (
+            <>
+              <label style={{ marginTop: 12 }}>Asignar auxiliar</label>
+              <select value={auxiliarSeleccionado} onChange={(e) => setAuxiliarSeleccionado(e.target.value)}>
+                <option value="">Seleccioná un empleado...</option>
+                {usuariosDisponibles.map((u) => (
+                  <option key={u.id} value={u.id}>{u.nombreUsuario}</option>
+                ))}
+              </select>
+              <button
+                className="btn-secondary"
+                disabled={!auxiliarSeleccionado}
+                onClick={() =>
+                  accion(async () => {
+                    await asignarAuxiliar(turno.id, Number(auxiliarSeleccionado));
+                    setAuxiliarSeleccionado("");
+                  })
+                }
+              >
+                + ASIGNAR AUXILIAR
+              </button>
+            </>
+          )}
 
-          <button className="btn-peligro" style={{ marginTop: 10 }} onClick={() => navigate("/salida")}>
-            REGISTRAR MI SALIDA
-          </button>
+          {turno && estoyActivo && (
+            <button className="btn-peligro" style={{ marginTop: 10 }} onClick={() => navigate("/salida")}>
+              REGISTRAR MI SALIDA
+            </button>
+          )}
 
         </InfoCard>
       )}

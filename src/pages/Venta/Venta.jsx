@@ -4,16 +4,12 @@ import PageHeader from "../../components/PageHeader";
 import { listarCatalogos, listarProductosPorCatalogo } from "../../api/productos";
 import { buscarClientes } from "../../api/clientes";
 import { crearVentaDirecta } from "../../api/confiteria";
-import { listarTurnos, obtenerActivos } from "../../api/turnos";
-import { listarUsuarios } from "../../api/usuarios";
 import "./Venta.css";
 
 export default function Venta() {
   const [catalogos, setCatalogos] = useState([]);
   const [productosPorCatalogo, setProductosPorCatalogo] = useState({});
   const [cantidades, setCantidades] = useState({});
-  const [usuarios, setUsuarios] = useState([]);
-  const [empleadosActivos, setEmpleadosActivos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [confirmando, setConfirmando] = useState(false);
@@ -22,7 +18,6 @@ export default function Venta() {
   const [resultadosCliente, setResultadosCliente] = useState([]);
   const [clienteElegido, setClienteElegido] = useState(null);
   const [nombreClienteNuevo, setNombreClienteNuevo] = useState("");
-  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState("");
   const [exito, setExito] = useState(null);
 
   async function cargar() {
@@ -36,12 +31,6 @@ export default function Venta() {
         productosMap[cat.id] = await listarProductosPorCatalogo(cat.id);
       }
       setProductosPorCatalogo(productosMap);
-
-      const [usuariosData, turnos] = await Promise.all([listarUsuarios(), listarTurnos()]);
-      setUsuarios(usuariosData);
-
-      const turnoAbierto = turnos.find((t) => !t.salida);
-      setEmpleadosActivos(turnoAbierto ? await obtenerActivos(turnoAbierto.id) : []);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -52,10 +41,6 @@ export default function Venta() {
   useEffect(() => {
     cargar();
   }, []);
-
-  function nombreDe(empleadoId) {
-    return usuarios.find((u) => u.id === empleadoId)?.nombreUsuario ?? "—";
-  }
 
   function cambiarCantidad(productoId, delta) {
     setCantidades((prev) => {
@@ -119,15 +104,9 @@ export default function Venta() {
         return;
       }
 
-      if (!empleadoSeleccionado) {
-        setError("Seleccioná qué empleado registra la venta.");
-        return;
-      }
-
       await crearVentaDirecta({
         clienteId: clienteElegido ? clienteElegido.id : null,
         nombreClienteNuevo: clienteElegido ? null : nombreClienteNuevo.trim(),
-        empleadoId: Number(empleadoSeleccionado),
         items: carrito.map((i) => ({ productoId: i.productoId, cantidad: i.cantidad })),
       });
 
@@ -136,7 +115,6 @@ export default function Venta() {
       setClienteElegido(null);
       setBusquedaCliente("");
       setNombreClienteNuevo("");
-      setEmpleadoSeleccionado("");
       setConfirmando(false);
     } catch (e) {
       setError(e.message);
@@ -229,14 +207,6 @@ export default function Venta() {
                 onChange={(e) => escribirClienteNuevo(e.target.value)}
                 disabled={Boolean(clienteElegido)}
               />
-
-              <label style={{ marginTop: 12 }}>Empleado</label>
-              <select value={empleadoSeleccionado} onChange={(e) => setEmpleadoSeleccionado(e.target.value)}>
-                <option value="">Seleccioná un empleado...</option>
-                {empleadosActivos.map((a) => (
-                  <option key={a.empleadoId} value={a.empleadoId}>{nombreDe(a.empleadoId)}</option>
-                ))}
-              </select>
 
               <button className="btn-primary" style={{ marginTop: 14 }} onClick={confirmarVenta}>
                 FINALIZAR VENTA
