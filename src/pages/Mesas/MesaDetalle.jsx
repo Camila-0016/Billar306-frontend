@@ -71,6 +71,13 @@ export default function MesaDetalle() {
     return inicio && ahora - inicio.getTime() < 60000;
   }
 
+  function segundosRestantes(fechaInicioItem) {
+    const inicio = parsearFechaUtc(fechaInicioItem);
+    if (!inicio) return 0;
+    const transcurridos = Math.floor((ahora - inicio.getTime()) / 1000);
+    return Math.max(0, 60 - transcurridos);
+  }
+
   async function abrirModalConsumicion() {
     setErrorModal(null);
     setCantidades({});
@@ -205,12 +212,10 @@ export default function MesaDetalle() {
                 <div key={item.id} className="item-card">
                   <div className="item-info">
                     <span className="item-nombre">{item.cantidad}x {item.nombre}</span>
-                    {enVentana ? (
-                      <button className="item-estado anulable" onClick={() => retirarItem(item.id)}>
-                        (En tiempo de anulación — tocar para quitar)
+                    {enVentana && (
+                      <button className="item-anular" onClick={() => retirarItem(item.id)}>
+                        Anular <span className="item-anular-contador">{segundosRestantes(item.fechaInicio)}s</span>
                       </button>
-                    ) : (
-                      <span className="item-estado bloqueado">(Fijo — bloqueado)</span>
                     )}
                   </div>
                   <span className="item-precio">${item.total.toLocaleString("es-AR")}</span>

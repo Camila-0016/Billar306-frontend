@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { listarDiasLaborales } from "../../api/diaLaboral";
 import { listarUsuarios } from "../../api/usuarios";
 import { formatearHora, formatearFecha, parsearFechaUtc } from "../../utils/fecha";
+import { authHeaders } from "../../api/http";
 import "./SubPagina.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -20,7 +21,9 @@ export default function DiaLaboralDetalle() {
   useEffect(() => {
     async function cargar() {
       try {
-        const res = await fetch(`${API_URL}/api/dialaborales/${id}`);
+        const res = await fetch(`${API_URL}/api/dialaborales/${id}`, {
+          headers: { ...authHeaders() },
+        });
         if (!res.ok) throw new Error("No se pudo obtener el detalle del día");
         const detalle = await res.json();
         setDia(detalle);

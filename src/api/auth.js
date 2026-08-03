@@ -9,3 +9,7 @@ export async function login(nombreUsuario, password) {
   if (!res.ok) throw new Error((await res.json()).mensaje ?? "Usuario o contraseña incorrectos");
   return res.json();
 }
+
+
+
+

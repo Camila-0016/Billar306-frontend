@@ -54,22 +54,27 @@
   font-size: 14px;
   display: block;
 }
-.item-estado {
-  font-size: 11px;
+.item-anular {
   border: none;
   background: none;
   padding: 0;
-  cursor: default;
-  display: block;
   margin-top: 2px;
-}
-.item-estado.anulable {
-  color: #c98a10;
   cursor: pointer;
-  text-decoration: underline;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--color-error);
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
-.item-estado.bloqueado {
+.item-anular-contador {
+  font-weight: normal;
   color: #999;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 1px 6px;
+  min-width: 24px;
+  text-align: center;
 }
 .item-precio {
   font-weight: bold;
