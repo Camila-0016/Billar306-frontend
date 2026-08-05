@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { obtenerDetalleTurno } from "../../api/reportes";
 import { listarUsuarios } from "../../api/usuarios";
 import { formatearHora } from "../../utils/fecha";
-import "./SubPagina.css";
+
 
 export default function TurnoDetalle() {
   const { id } = useParams();

@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ShoppingCart } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import { listarCatalogos, listarProductosPorCatalogo } from "../../api/productos";
 import { buscarClientes } from "../../api/clientes";
 import { crearVentaDirecta } from "../../api/confiteria";
-import "./Venta.css";
 
 export default function Venta() {
   const [catalogos, setCatalogos] = useState([]);
@@ -19,6 +18,12 @@ export default function Venta() {
   const [clienteElegido, setClienteElegido] = useState(null);
   const [nombreClienteNuevo, setNombreClienteNuevo] = useState("");
   const [exito, setExito] = useState(null);
+
+  const carritoRef = useRef(null);
+
+  function irAlCarrito() {
+    carritoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function cargar() {
     try {
@@ -136,6 +141,18 @@ export default function Venta() {
       {error && <div className="error-msg">{error}</div>}
       {exito && <div className="exito-msg">{exito}</div>}
 
+      {carrito.length > 0 && (
+        <button
+          onClick={irAlCarrito}
+          className="sticky top-0 z-10 w-full flex items-center justify-between bg-fieltro text-marfil rounded-lg px-4 py-2.5 mb-3 shadow-md"
+        >
+          <span className="font-bold text-sm">
+            🛒 Carrito ({carrito.reduce((acc, i) => acc + i.cantidad, 0)})
+          </span>
+          <span className="font-bold text-sm">${totalCarrito.toLocaleString("es-AR")}</span>
+        </button>
+      )}
+
       {catalogos.map((cat) => (
         <div key={cat.id}>
           <div className="categoria-titulo">{cat.categoria.toUpperCase()}</div>
@@ -156,7 +173,7 @@ export default function Venta() {
       ))}
 
       {carrito.length > 0 && (
-        <>
+        <div ref={carritoRef}>
           <div className="seccion-titulo">Carrito</div>
           {carrito.map((i) => (
             <div key={i.productoId} className="fila-detalle">
@@ -190,6 +207,7 @@ export default function Venta() {
                   className={`resultado-cliente ${clienteElegido?.id === c.id ? "elegido" : ""}`}
                   onClick={() => {
                     setClienteElegido(c);
+                    busquedaCliente(c.nombreCompleto);
                     setBusquedaCliente(c.nombreCompleto);
                     setResultadosCliente([]);
                   }}
@@ -213,7 +231,7 @@ export default function Venta() {
               </button>
             </div>
           )}
-        </>
+        </div>
       )}
     </>
   );

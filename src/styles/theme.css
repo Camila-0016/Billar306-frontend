@@ -1,100 +1,141 @@
-:root {
+@import "tailwindcss";
+
+@theme {
   --color-fieltro: #0d5c3d;
   --color-fieltro-oscuro: #073d29;
-  --color-madera: #4e342e;
   --color-madera-oscura: #2e1a13;
   --color-dorado: #c9a227;
   --color-dorado-claro: #e0c25c;
   --color-marfil: #f8f4ea;
-  --color-texto: #2b1d12;
-  --color-error: #b3261e;
   --color-borde: #d8cdb0;
-
-  --radio: 10px;
-  --sombra: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --color-error: #b3261e;
 }
 
-* {
-  box-sizing: border-box;
+@layer base {
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    @apply bg-fieltro-oscuro text-[#2b1d12];
+  }
+  #root {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+  input:not([type="checkbox"]):not([type="radio"]) {
+    @apply p-3 rounded-[10px] border border-borde text-sm w-full bg-white text-[#2b1d12];
+  }
+  input[type="checkbox"], input[type="radio"] {
+    @apply w-auto;
+  }
+  label {
+    @apply text-[12px] font-semibold text-madera-oscura block mb-1;
+  }
 }
 
-body {
-  margin: 0;
-  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: var(--color-fieltro-oscuro);
-  color: var(--color-texto);
-}
+@layer components {
+  /* Botones */
+  .btn-primary {
+    @apply w-full bg-dorado text-madera-oscura border-none py-3 px-3 rounded-[10px] font-bold text-sm cursor-pointer disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply w-full bg-marfil text-madera-oscura border border-borde py-3 px-3 rounded-[10px] font-semibold text-sm cursor-pointer disabled:opacity-60;
+  }
+  .btn-peligro {
+    @apply w-full bg-error text-white border-none py-3 px-3 rounded-[10px] font-bold text-sm cursor-pointer disabled:opacity-60;
+  }
 
-#root {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-}
+  /* Mensajes */
+  .error-msg { @apply text-error text-[13px] mb-2.5; }
+  .exito-msg { @apply bg-[#e8f5e9] text-[#2e7d32] p-2.5 px-3.5 rounded-[10px] text-[13px] mb-3; }
+  .hint-texto { @apply text-gray-500 text-[13px]; }
+  .seccion-titulo { @apply text-[12px] uppercase text-gray-500 mt-4 mb-2 font-bold; }
 
-/* Botones reutilizables en toda la app */
-.btn-primary {
-  background: var(--color-dorado);
-  color: var(--color-madera-oscura);
-  border: none;
-  padding: 12px;
-  border-radius: var(--radio);
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  width: 100%;
-}
+  /* Badge de estado (abierto/cerrado) */
+  .estado-badge { @apply text-[11px] font-bold py-[3px] px-2 rounded-full; }
+  .estado-badge.abierto { @apply bg-[#e8f5e9] text-[#2e7d32]; }
+  .estado-badge.cerrado { @apply bg-[#fdecea] text-[#c62828]; }
 
-.btn-secondary {
-  background: var(--color-marfil);
-  color: var(--color-madera-oscura);
-  border: 1px solid var(--color-borde);
-  padding: 12px;
-  border-radius: var(--radio);
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  width: 100%;
-}
+  /* Filas de detalle */
+  .fila-detalle { @apply flex justify-between py-2 border-b border-gray-200 text-sm; }
+  .fila-detalle.total { @apply font-bold text-base border-none mt-1.5; }
 
-.btn-peligro {
-  background: var(--color-error);
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: var(--radio);
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  width: 100%;
-}
+  /* Grilla de mesas */
+  .mesa-card { @apply rounded-[10px] py-4.5 px-2 text-center text-white font-bold cursor-pointer border-none text-sm flex flex-col items-center; }
+  .mesa-card.libre { @apply bg-[#2e7d32]; }
+  .mesa-card.ocupada { @apply bg-error; }
+  .mesa-card .monto { @apply block font-normal mt-1 text-xs opacity-90; }
 
-input {
-  padding: 12px;
-  border-radius: var(--radio);
-  border: 1px solid var(--color-borde);
-  font-size: 14px;
-  width: 100%;
-}
+  /* Búsqueda de cliente */
+  .resultado-cliente { @apply p-2.5 border-b border-borde text-sm cursor-pointer; }
+  .resultado-cliente.elegido { @apply bg-[#fdf3d0] font-bold; }
+  .separador-o { @apply text-center text-gray-400 text-xs my-2.5; }
 
-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-madera-oscura);
-  display: block;
-  margin-bottom: 4px;
-}
+  /* Ítems de consumición */
+  .item-card { @apply bg-white border-l-4 border-dorado rounded-[10px] py-2.5 px-3.5 mb-2 flex justify-between items-center; }
+  .item-nombre { @apply font-bold text-sm block; }
+  .item-anular { @apply border-none bg-transparent p-0 mt-0.5 cursor-pointer text-[11px] font-bold text-error flex items-center gap-1.5; }
+  .item-anular-contador { @apply font-normal text-gray-400 bg-gray-100 rounded-full py-0.5 px-1.5 min-w-6 text-center; }
+  .item-precio { @apply font-bold text-sm; }
 
-.estado-badge {
-  font-size: 11px;
-  font-weight: bold;
-  padding: 3px 8px;
-  border-radius: 12px;
-}
-.estado-badge.abierto {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-.estado-badge.cerrado {
-  background: #fdecea;
-  color: #c62828;
+  /* Catálogo / carrito (Venta y modal de consumición) */
+  .categoria-titulo { @apply font-bold text-[12px] text-fieltro mt-3.5 mb-1.5; }
+  .producto-fila { @apply bg-white rounded-[10px] py-2.5 px-3.5 mb-2 flex justify-between items-center shadow-sm; }
+  .producto-nombre { @apply font-bold text-sm; }
+  .producto-precio { @apply text-xs text-gray-500; }
+  .cantidad-selector { @apply flex items-center gap-2.5; }
+  .cantidad-btn { @apply w-7 h-7 rounded-full border-none bg-fieltro text-white text-base font-bold cursor-pointer flex items-center justify-center; }
+  .cantidad-valor { @apply min-w-[18px] text-center font-bold; }
+
+  /* Venta directa */
+  .confirmacion-venta { @apply bg-white border-l-4 border-dorado rounded-[10px] py-3.5 px-4 mt-3.5 shadow-sm; }
+
+  /* Ticket de cierre de mesa */
+  .ticket { @apply text-[13px]; }
+  .ticket-linea { @apply flex justify-between py-1.5 border-b border-dashed border-gray-300; }
+  .ticket-subtitulo { @apply font-bold text-[12px] my-2.5 text-fieltro; }
+  .ticket-total { @apply font-bold text-[15px] border-none border-t-2 border-t-madera-oscura mt-1.5 pt-2; }
+  .badge-cerrada { @apply text-center bg-gray-100 text-gray-400 py-2.5 rounded-[10px] font-bold text-[13px] mt-3.5; }
+
+  /* Salida */
+  .aviso-amarillo { @apply bg-[#fff3cd] text-[#856404]; }
+  .checkbox-fila { @apply flex items-center gap-2 mt-2.5 text-[13px]; }
+
+  /* Menú "Más" */
+  .sesion-actual { @apply text-[13px] text-gray-500 mb-4; }
+  .menu-item { @apply flex items-center gap-2.5 py-3.5 px-1 border-b border-gray-200 text-sm cursor-pointer; }
+  .menu-item.peligro { @apply text-error; }
+
+  /* Historial: días laborales y turnos */
+  .dia-card { @apply bg-white rounded-[10px] py-3 px-3.5 mb-2.5 shadow-sm cursor-pointer border-l-4 border-gray-400; }
+  .dia-card.abierto { @apply border-l-[#2e7d32]; }
+  .dia-card.cerrado { @apply border-l-[#c62828]; }
+  .dia-card-top { @apply flex justify-between items-center; }
+  .dia-titulo { @apply font-bold text-sm; }
+  .dia-fecha-texto { @apply text-[13px] text-gray-600 mt-1 mb-0.5; }
+  .turno-card { @apply bg-white rounded-[10px] py-3 px-3.5 mb-2.5 shadow-sm cursor-pointer; }
+  .turno-card-top { @apply flex justify-between items-center; }
+  .turno-titulo { @apply font-bold text-sm; }
+  .turno-personal { @apply text-xs text-gray-600 mt-1; }
+
+  /* Login */
+  .login-screen { @apply min-h-screen w-full max-w-[480px] flex flex-col justify-center p-6 bg-fieltro-oscuro gap-1; }
+  .login-logo { @apply text-center text-dorado-claro text-2xl font-bold mb-7; }
+  .login-screen label { @apply text-marfil; }
+  .login-error { @apply bg-[#ffebee]; }
+
+  /* Grilla de mesas */
+  /*.mesas-grid { @apply grid grid-cols-2 gap-2.5; }*/
+  .mesas-grid { @apply grid grid-cols-2 lg:grid-cols-4 gap-2.5; }
+
+  /* Encabezados de sub-pantallas (con flecha de volver) */
+  .subpagina-header, .mesa-detalle-header {
+    @apply bg-fieltro text-dorado-claro px-4 py-3.5 -mx-4 -mt-4 mb-4 font-bold flex items-center gap-2.5 border-b-4 border-dorado;
+  }
+  .volver-btn {
+    @apply bg-transparent border-none text-marfil cursor-pointer flex items-center;
+  }
+
+  
+  .clickable { @apply cursor-pointer; }
 }

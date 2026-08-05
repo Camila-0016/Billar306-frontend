@@ -5,7 +5,6 @@ import { listarDiasLaborales } from "../../api/diaLaboral";
 import { listarUsuarios } from "../../api/usuarios";
 import { formatearHora, formatearFecha, parsearFechaUtc } from "../../utils/fecha";
 import { authHeaders } from "../../api/http";
-import "./SubPagina.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

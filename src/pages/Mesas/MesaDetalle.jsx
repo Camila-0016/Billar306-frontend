@@ -10,7 +10,7 @@ import { listarUsuarios } from "../../api/usuarios";
 import { obtenerCliente } from "../../api/clientes";
 import { formatearHora, formatearDuracion, parsearFechaUtc } from "../../utils/fecha";
 import Modal from "../../components/Modal";
-import "./MesaDetalle.css";
+
 
 export default function MesaDetalle() {
   const { id } = useParams();

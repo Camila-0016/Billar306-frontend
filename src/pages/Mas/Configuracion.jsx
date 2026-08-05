@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { obtenerConfiguracion, guardarConfiguracion } from "../../api/configuracion";
-import "./SubPagina.css";
 
 export default function Configuracion() {
   const navigate = useNavigate();

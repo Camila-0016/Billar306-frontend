@@ -7,7 +7,7 @@ import { listarMesas } from "../../api/mesas";
 import { listarSesionesAbiertas, abrirSesion } from "../../api/sesionesMesa";
 import { buscarClientes } from "../../api/clientes";
 import { listarTurnos } from "../../api/turnos";
-import "./Mesas.css";
+
 
 export default function Mesas() {
   const navigate = useNavigate();

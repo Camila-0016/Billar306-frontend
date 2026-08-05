@@ -3,7 +3,6 @@ import { Users, Plus } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import { buscarClientes, crearCliente, listarClientes } from "../../api/clientes";
 import Modal from "../../components/Modal";
-import "./Clientes.css";
 
 export default function Clientes() {
   const [busqueda, setBusqueda] = useState("");
@@ -37,7 +36,7 @@ export default function Clientes() {
     setError(null);
 
     if (valor.length < 2) {
-      await cargarTodos(); // sin búsqueda activa, vuelve a mostrar la lista completa
+      await cargarTodos();
       return;
     }
 
@@ -86,13 +85,19 @@ export default function Clientes() {
       )}
 
       {clientes.map((c) => (
-        <div key={c.id} className="cliente-item">
-          {c.nombreCompleto}
+        <div
+          key={c.id}
+          className="flex items-center gap-3 bg-white rounded-xl p-3 mt-2 shadow-sm border border-borde/40"
+        >
+          <div className="w-10 h-10 rounded-full bg-dorado/20 text-madera-oscura flex items-center justify-center font-bold text-sm shrink-0">
+            {c.nombreCompleto.charAt(0).toUpperCase()}
+          </div>
+          <span className="font-medium text-sm text-[#2b1d12]">{c.nombreCompleto}</span>
         </div>
       ))}
 
       <button
-        className="fab-agregar"
+        className="fixed bottom-[84px] z-40 w-[52px] h-[52px] rounded-full bg-dorado text-madera-oscura border-none flex items-center justify-center shadow-lg cursor-pointer hover:opacity-90 right-[max(24px,calc(50vw-216px))] lg:right-[max(24px,calc(50vw-360px))]"
         onClick={() => {
           setNombreNuevo("");
           setErrorModal(null);

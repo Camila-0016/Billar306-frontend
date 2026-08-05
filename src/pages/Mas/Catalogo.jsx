@@ -9,7 +9,6 @@ import {
   actualizarProducto,
 } from "../../api/productos";
 import Modal from "../../components/Modal";
-import "./SubPagina.css";
 
 export default function Catalogo() {
   const navigate = useNavigate();

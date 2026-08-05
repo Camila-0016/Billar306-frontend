@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { listarDiasLaborales } from "../../api/diaLaboral";
 import { useAuth } from "../../context/AuthContext";
 import { formatearHora, formatearFecha, parsearFechaUtc } from "../../utils/fecha";
-import "./SubPagina.css";
+
 
 export default function DiasLaborales() {
   const navigate = useNavigate();
