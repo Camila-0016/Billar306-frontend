@@ -8,7 +8,6 @@ import { listarSesionesAbiertas, abrirSesion } from "../../api/sesionesMesa";
 import { buscarClientes } from "../../api/clientes";
 import { listarTurnos } from "../../api/turnos";
 
-
 export default function Mesas() {
   const navigate = useNavigate();
   const [mesas, setMesas] = useState([]);
@@ -23,6 +22,7 @@ export default function Mesas() {
   const [clienteElegido, setClienteElegido] = useState(null);
   const [nombreClienteNuevo, setNombreClienteNuevo] = useState("");
   const [errorModal, setErrorModal] = useState(null);
+  const [enviando, setEnviando] = useState(false);
 
   async function cargar() {
     try {
@@ -65,6 +65,7 @@ export default function Mesas() {
     setClienteElegido(null);
     setNombreClienteNuevo("");
     setErrorModal(null);
+    setEnviando(false);
   }
 
   async function buscarClienteInput(valor) {
@@ -89,7 +90,9 @@ export default function Mesas() {
   }
 
   async function confirmarApertura() {
+    if (enviando) return; // protección extra contra doble clic
     try {
+      setEnviando(true);
       setErrorModal(null);
       if (!clienteElegido && !nombreClienteNuevo.trim()) {
         setErrorModal("Elegí un cliente existente o escribí uno nuevo.");
@@ -106,6 +109,8 @@ export default function Mesas() {
       await cargar();
     } catch (e) {
       setErrorModal(e.message);
+    } finally {
+      setEnviando(false);
     }
   }
 
@@ -143,7 +148,7 @@ export default function Mesas() {
       </div>
 
       {mesaSeleccionada && (
-        <Modal title={`Abrir Mesa ${mesaSeleccionada.numero}`} onClose={() => setMesaSeleccionada(null)}>
+        <Modal title={`Abrir Mesa ${mesaSeleccionada.numero}`} onClose={() => !enviando && setMesaSeleccionada(null)}>
           {errorModal && <div className="error-msg">{errorModal}</div>}
 
           <label>Cliente</label>
@@ -151,7 +156,7 @@ export default function Mesas() {
             placeholder="Buscar cliente..."
             value={busquedaCliente}
             onChange={(e) => buscarClienteInput(e.target.value)}
-            disabled={nombreClienteNuevo.length > 0}
+            disabled={nombreClienteNuevo.length > 0 || enviando}
           />
           {resultadosCliente.map((c) => (
             <div
@@ -174,11 +179,16 @@ export default function Mesas() {
             placeholder="Nombre completo"
             value={nombreClienteNuevo}
             onChange={(e) => escribirClienteNuevo(e.target.value)}
-            disabled={Boolean(clienteElegido)}
+            disabled={Boolean(clienteElegido) || enviando}
           />
 
-          <button className="btn-primary" style={{ marginTop: 14 }} onClick={confirmarApertura}>
-            ABRIR MESA
+          <button 
+            className="btn-primary" 
+            style={{ marginTop: 14 }} 
+            onClick={confirmarApertura}
+            disabled={enviando}
+          >
+            {enviando ? "ABRIENDO..." : "ABRIR MESA"}
           </button>
         </Modal>
       )}
