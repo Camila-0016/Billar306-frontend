@@ -1,19 +1,17 @@
-import { authHeaders } from "./http";
+import { apiFetch } from "./http";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export async function listarUsuarios() {
-  const res = await fetch(`${API_URL}/api/usuarios`, {
-    headers: { ...authHeaders() },
-  });
+  const res = await apiFetch(`${API_URL}/api/usuarios`);
   if (!res.ok) throw new Error("Error al listar usuarios");
   return res.json();
 }
 
 export async function crearUsuario({ nombreUsuario, password, rol }) {
-  const res = await fetch(`${API_URL}/api/usuarios`, {
+  const res = await apiFetch(`${API_URL}/api/usuarios`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ nombreUsuario, password, rol }),
   });
   if (!res.ok) throw new Error((await res.json()).mensaje ?? "Error al crear usuario");
@@ -21,9 +19,9 @@ export async function crearUsuario({ nombreUsuario, password, rol }) {
 }
 
 export async function actualizarUsuario(id, { nombreUsuario, rol, activo }) {
-  const res = await fetch(`${API_URL}/api/usuarios/${id}`, {
+  const res = await apiFetch(`${API_URL}/api/usuarios/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, nombreUsuario, rol, activo }),
   });
   if (!res.ok) throw new Error((await res.json()).mensaje ?? "Error al actualizar usuario");

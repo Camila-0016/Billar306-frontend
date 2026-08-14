@@ -98,7 +98,7 @@ export default function TurnoDetalle() {
   </div>
 ))}
 
-        <h4 className="seccion-titulo">Productos vendidos</h4>
+        <h4 className="seccion-titulo">Productos vendidos en el Turno</h4>
 {reporte.productosVendidos.length === 0 && <p className="hint-texto">Sin ventas de confitería en este turno.</p>}
 {reporte.productosVendidos.map((p) => (
   <div key={p.productoId} className="fila-detalle">
