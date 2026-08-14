@@ -1,4 +1,4 @@
-import { Menu, Settings, Package, ClipboardList, LogOut } from "lucide-react";
+import { Menu, Settings, Package, ClipboardList, LogOut, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import { useAuth } from "../../context/AuthContext";
@@ -19,6 +19,9 @@ export default function Mas() {
 
       {sesion?.rol === "Jefe" && (
         <>
+          <div className="menu-item" onClick={() => navigate("/mas/usuarios")}>
+            <UserCog size={18} /> Usuarios
+          </div>
           <div className="menu-item" onClick={() => navigate("/mas/configuracion")}>
             <Settings size={18} /> Configuración (tarifas)
           </div>
@@ -27,6 +30,7 @@ export default function Mas() {
           </div>
         </>
       )}
+
       <div className="menu-item" onClick={() => navigate("/mas/dias-laborales")}>
         <ClipboardList size={18} /> Historial días laborales
       </div>

@@ -44,6 +44,9 @@
   .btn-peligro {
     @apply w-full bg-error text-white border-none py-3 px-3 rounded-[10px] font-bold text-sm cursor-pointer disabled:opacity-60;
   }
+  .page-narrow { 
+    @apply lg:max-w-2xl lg:mx-auto; 
+  }
 
   /* Mensajes */
   .error-msg { @apply text-error text-[13px] mb-2.5; }
@@ -130,7 +133,7 @@
 
   /* Encabezados de sub-pantallas (con flecha de volver) */
   .subpagina-header, .mesa-detalle-header {
-    @apply bg-fieltro text-dorado-claro px-4 py-3.5 -mx-4 -mt-4 mb-4 font-bold flex items-center gap-2.5 border-b-4 border-dorado;
+    @apply bg-fieltro text-dorado-claro px-4 lg:px-8 py-3.5 -mx-4 -mt-4 lg:-mx-8 lg:-mt-8 mb-4 font-bold flex items-center gap-2.5 border-b-4 border-dorado;
   }
   .volver-btn {
     @apply bg-transparent border-none text-marfil cursor-pointer flex items-center;

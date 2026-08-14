@@ -16,48 +16,48 @@ export default function Salida() {
   const [aviso, setAviso] = useState(null);
 
   useEffect(() => {
-  obtenerEstadoSalida()
-    .then(setEstado)
-    .catch((e) => setError(e.message))
-    .finally(() => setCargando(false));
-}, []);
+    obtenerEstadoSalida()
+      .then(setEstado)
+      .catch((e) => setError(e.message))
+      .finally(() => setCargando(false));
+  }, []);
 
-async function confirmar() {
-  try {
-    setError(null);
-    const resultado = await confirmarSalida(cerrarDia);
-    setAviso(resultado.mensaje);
-    setConfirmado(true);
-  } catch (e) {
-    setError(e.message);
+  async function confirmar() {
+    try {
+      setError(null);
+      const resultado = await confirmarSalida(cerrarDia);
+      setAviso(resultado.mensaje);
+      setConfirmado(true);
+    } catch (e) {
+      setError(e.message);
+    }
   }
-}
 
   if (cargando) return <p style={{ padding: 16 }}>Cargando...</p>;
 
   if (confirmado) {
     return (
-      <>
+      <div className="page-narrow">
         <PageHeader Icon={LogOut} title="SALIDA" />
         <p>Salida registrada correctamente.</p>
         {aviso && <p className="hint-texto">{aviso}</p>}
         <button className="btn-primary" onClick={() => navigate("/turno")}>VOLVER</button>
-      </>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
+      <div className="page-narrow">
         <PageHeader Icon={LogOut} title="SALIDA" />
         <div className="error-msg">{error}</div>
         <button className="btn-secondary" onClick={() => navigate("/turno")}>VOLVER</button>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="page-narrow">
       <PageHeader Icon={LogOut} title="SALIDA" />
       <p>Hola, {sesion.nombreUsuario}.</p>
 
@@ -87,6 +87,6 @@ async function confirmar() {
       <button className="btn-peligro" style={{ marginTop: 14 }} onClick={confirmar}>
         CONFIRMAR SALIDA
       </button>
-    </>
+    </div>
   );
 }

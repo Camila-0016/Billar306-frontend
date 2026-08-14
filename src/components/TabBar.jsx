@@ -11,7 +11,7 @@ const TABS = [
 
 export default function TabBar() {
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] lg:max-w-3xl flex bg-[#14100e] border-t border-[#2a2420] z-40">
+    <nav className="lg:hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] flex bg-[#14100e] border-t border-[#2a2420] z-40">
       {TABS.map(({ to, Icon, label }) => (
         <NavLink
           key={to}

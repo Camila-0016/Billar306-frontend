@@ -15,6 +15,7 @@ import DiaLaboralDetalle from "./pages/Mas/DiaLaboralDetalle";
 import TurnoDetalle from "./pages/Mas/TurnoDetalle";
 import RutaSoloJefe from "./components/RutaSoloJefe";
 import Salida from "./pages/Salida/Salida";
+import Usuarios from "./pages/Mas/Usuarios";
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/mas/dias-laborales/:id" element={<DiaLaboralDetalle />} />
         <Route path="/mas/turno/:id" element={<TurnoDetalle />} />
         <Route path="/salida" element={<Salida />} />
+        <Route path="/mas/usuarios" element={<RutaSoloJefe><Usuarios /></RutaSoloJefe>} />
       </Route>
     </Routes>
   );

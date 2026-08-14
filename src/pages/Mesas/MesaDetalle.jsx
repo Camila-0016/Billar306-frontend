@@ -159,7 +159,7 @@ export default function MesaDetalle() {
         <span>{esMesa ? `Mesa ${cuenta.numeroMesa}` : "Venta directa"}</span>
       </div>
 
-      <div className="mesa-detalle-body">
+      <div className="mesa-detalle-body page-narrow">
         <div className="fila-detalle">
           <span>Cliente</span>
           <span>{clienteNombre}</span>

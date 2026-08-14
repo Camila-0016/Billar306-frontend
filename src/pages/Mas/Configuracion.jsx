@@ -55,7 +55,7 @@ export default function Configuracion() {
         </button>
         <span>Configuración</span>
       </div>
-      <div className="subpagina-body">
+      <div className="subpagina-body page-narrow">
         {error && <div className="error-msg">{error}</div>}
         {exito && <div className="exito-msg">{exito}</div>}
 

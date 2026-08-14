@@ -53,7 +53,7 @@ export default function TurnoDetalle() {
         </button>
         <span>Turno — {nombreDe(reporte.titularId)}</span>
       </div>
-      <div className="subpagina-body">
+      <div className="subpagina-body page-narrow">
         <p className="hint-texto">
           {formatearHora(reporte.fechaInicio)} → {reporte.salida ? formatearHora(reporte.salida) : "en curso"}
           <br />
